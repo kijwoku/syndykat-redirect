@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Syndykat — przekierowanie</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 40px 20px;
+            color: #333;
+        }
+        .karta {
+            max-width: 480px;
+            margin: 60px auto;
+            background: white;
+            border-radius: 8px;
+            padding: 32px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        h1 { color: #1a3c5e; font-size: 22px; margin-top: 0; }
+        p { color: #555; line-height: 1.5; }
+        .status { font-size: 14px; color: #888; margin-top: 24px; }
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+            color: #c0392b;
+        }
+        .btn {
+            display: inline-block;
+            background: #2c6fad;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 12px;
+        }
+        .btn:hover { background: #1a3c5e; }
+        .stopka { font-size: 11px; color: #aaa; margin-top: 32px; }
+    </style>
+</head>
+<body>
+    <div class="karta">
+        <h1>🏠 Otwieram aplikację Syndykat...</h1>
+        <p>Trwa otwieranie aplikacji desktopowej z pre-fillowanym formularzem.</p>
+
+        <p class="status" id="status">Przekierowanie za chwilę...</p>
+
+        <div id="manualny" style="display:none;">
+            <p>Jeśli nic się nie dzieje, kliknij ręcznie:</p>
+            <a href="#" id="link" class="btn">Otwórz w aplikacji</a>
+            <p style="font-size:11px;margin-top:16px;">
+                Aplikacja musi być zainstalowana i przynajmniej raz uruchomiona,
+                żeby zarejestrować protokół <code>syndykat://</code>.
+            </p>
+        </div>
+
+        <p class="stopka">
+            <a href="https://github.com/kijwoku/Syndykat.Desktop" style="color:#888;">Repozytorium aplikacji</a>
+        </p>
+    </div>
+
+    <script>
+        (function() {
+            // Bierzemy wszystko z query string i dorabiamy schemat syndykat://add
+            var query = window.location.search.slice(1); // bez '?'
+            if (!query) {
+                document.getElementById('status').textContent = 'Brak parametrów — nie ma czego otworzyć.';
+                return;
+            }
+
+            var docelowy = 'syndykat://add?' + query;
+            document.getElementById('link').setAttribute('href', docelowy);
+
+            // Pokazujemy backup po 1.5s gdyby się nie udało
+            setTimeout(function() {
+                document.getElementById('manualny').style.display = 'block';
+            }, 1500);
+
+            // Faktyczne przekierowanie
+            window.location.href = docelowy;
+        })();
+    </script>
+</body>
+</html>
