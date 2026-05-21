@@ -78,13 +78,18 @@
             var docelowy = 'syndykat://add?' + query;
             document.getElementById('link').setAttribute('href', docelowy);
 
-            // Pokazujemy backup po 1.5s gdyby się nie udało
-            setTimeout(function() {
-                document.getElementById('manualny').style.display = 'block';
-            }, 1500);
-
             // Faktyczne przekierowanie
             window.location.href = docelowy;
+
+            // Spróbuj zamknąć tab po przekierowaniu. Chrome blokuje window.close() dla
+            // kart otwartych nawigacją z linku (security), ale jeśli to się NIE uda,
+            // zobaczysz przycisk "Otwórz w aplikacji" + komunikat "możesz zamknąć tę kartę".
+            setTimeout(function() {
+                window.close();
+                // Jeżeli się nie zamknęło — pokażemy fallback
+                document.getElementById('status').textContent = 'Możesz zamknąć tę kartę.';
+                document.getElementById('manualny').style.display = 'block';
+            }, 800);
         })();
     </script>
 </body>
