@@ -67,9 +67,32 @@
     </div>
 
     <script>
+        // Dekoduje base64url → string. Gmail blokuje maile gdzie URL zawiera w sobie inny
+        // URL jako query param (klasyczny phishing pattern). Stąd kodujemy całe query
+        // jako base64 — w mailu link wygląda jak ?d=bGluaz1odHRw... zamiast ?link=https://...
+        function base64UrlDecode(s) {
+            s = s.replace(/-/g, '+').replace(/_/g, '/');
+            while (s.length % 4) { s += '='; }
+            return atob(s);
+        }
+
+        function pobierzQuery() {
+            var params = new URLSearchParams(window.location.search);
+
+            // Preferujemy format base64 (d=...), fallback do legacy bezposrednich parametrow
+            var blob = params.get('d');
+            if (blob) {
+                try { return base64UrlDecode(blob); }
+                catch (e) { return null; }
+            }
+
+            // Legacy: jeśli ktoś wszedł w stary link bez kodowania
+            var query = window.location.search.slice(1);
+            return query || null;
+        }
+
         (function() {
-            // Bierzemy wszystko z query string i dorabiamy schemat syndykat://add
-            var query = window.location.search.slice(1); // bez '?'
+            var query = pobierzQuery();
             if (!query) {
                 document.getElementById('status').textContent = 'Brak parametrów — nie ma czego otworzyć.';
                 return;
@@ -78,15 +101,10 @@
             var docelowy = 'syndykat://add?' + query;
             document.getElementById('link').setAttribute('href', docelowy);
 
-            // Faktyczne przekierowanie
             window.location.href = docelowy;
 
-            // Spróbuj zamknąć tab po przekierowaniu. Chrome blokuje window.close() dla
-            // kart otwartych nawigacją z linku (security), ale jeśli to się NIE uda,
-            // zobaczysz przycisk "Otwórz w aplikacji" + komunikat "możesz zamknąć tę kartę".
             setTimeout(function() {
                 window.close();
-                // Jeżeli się nie zamknęło — pokażemy fallback
                 document.getElementById('status').textContent = 'Możesz zamknąć tę kartę.';
                 document.getElementById('manualny').style.display = 'block';
             }, 800);
